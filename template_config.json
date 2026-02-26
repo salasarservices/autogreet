@@ -1,0 +1,63 @@
+{
+  "birthday": {
+    "template": "assets/templates/birthday.png",
+    "photo_box": {"x": 60, "y": 180, "w": 320, "h": 420},
+    "text_block": {
+      "x": 420,
+      "y": 240,
+      "line_spacing": 48,
+      "font_size_name": 38,
+      "font_size_detail": 26
+    }
+  },
+  "anniversary": {
+    "template": "assets/templates/anniversary.png",
+    "photo_box": {"x": 60, "y": 180, "w": 320, "h": 350},
+    "text_block": {
+      "x": 420,
+      "y": 240,
+      "line_spacing": 48,
+      "font_size_name": 38,
+      "font_size_detail": 26
+    },
+    "year_label": {
+      "x": 80,
+      "y": 80,
+      "font_size": 64
+    }
+  },
+  "fonts": {
+    "regular": "assets/fonts/regular.ttf",
+    "bold": "assets/fonts/bold.ttf",
+    "year": "assets/fonts/year.ttf"
+  },
+  "data_source": {
+    "mode": "sample_json",
+    "sample_url": "",
+    "zinghr": {
+      "base_url": "",
+      "client_id": "",
+      "client_secret_key": "zinghr_client_secret"
+    }
+  },
+  "field_mapping": {
+    "name": "EmployeeName",
+    "designation": "Designation",
+    "vertical": "Vertical",
+    "department": "Department",
+    "location": "Location",
+    "dob": "DateOfBirth",
+    "doj": "DateOfJoining",
+    "photo_url": "EmployeeImage"
+  },
+  "recipients": {
+    "birthday": {
+      "to": [],
+      "cc": []
+    },
+    "anniversary": {
+      "to": [],
+      "cc": []
+    }
+  }
+}
