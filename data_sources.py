@@ -2,52 +2,72 @@
 from __future__ import annotations
 
 import json
-import requests
-from datetime import datetime
+import logging
+import time
+from datetime import datetime, date
+from pathlib import Path
 from typing import Any
 
+import requests
 
-DATE_FORMAT = "%d-%m-%Y"
+logger = logging.getLogger(__name__)
+
+DATE_FORMATS = ("%d-%m-%Y", "%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%Y/%m/%d")
+
+# Simple in-process cache: {cache_key: (fetched_at_ts, data)}
+_cache: dict[str, tuple[float, list[dict]]] = {}
+CACHE_TTL_SECONDS = 3600  # 1 hour
 
 
-def parse_date(date_str: str) -> datetime | None:
-    """Parse a date string in DD-MM-YYYY format, return None on failure."""
+def parse_date(date_str: str) -> date | None:
+    """Parse a date string in multiple formats; return None on failure."""
     if not date_str:
         return None
-    for fmt in ("%d-%m-%Y", "%Y-%m-%d", "%d/%m/%Y"):
+    for fmt in DATE_FORMATS:
         try:
-            return datetime.strptime(date_str.strip(), fmt)
+            return datetime.strptime(date_str.strip(), fmt).date()
         except ValueError:
             continue
+    logger.warning("Could not parse date string: %r", date_str)
     return None
 
 
-def fetch_sample_json(url: str) -> list[dict[str, Any]]:
-    """Fetch employee data from a sample JSON URL.
+def fetch_sample_json(url: str, auth_header: dict | None = None) -> list[dict[str, Any]]:
+    """Fetch employee data from a JSON URL (object or list)."""
+    cache_key = url
+    now = time.monotonic()
+    if cache_key in _cache:
+        fetched_at, cached_data = _cache[cache_key]
+        if now - fetched_at < CACHE_TTL_SECONDS:
+            logger.debug("Returning cached employee data for %s", url)
+            return cached_data
 
-    The endpoint may return a single object or a list of objects.
-    """
-    resp = requests.get(url, timeout=15)
+    headers = dict(auth_header) if auth_header else {}
+    resp = requests.get(url, headers=headers, timeout=15)
     resp.raise_for_status()
     data = resp.json()
+
     if isinstance(data, dict):
-        return [data]
-    if isinstance(data, list):
-        return data
-    raise ValueError(f"Unexpected JSON structure: {type(data)}")
+        result = [data]
+    elif isinstance(data, list):
+        result = data
+    else:
+        raise ValueError(f"Unexpected JSON structure: {type(data)}")
+
+    _cache[cache_key] = (now, result)
+    logger.info("Fetched %d employee(s) from %s", len(result), url)
+    return result
+
+
+def invalidate_cache() -> None:
+    """Clear the in-process employee cache."""
+    _cache.clear()
 
 
 def fetch_zinghr(config: dict) -> list[dict[str, Any]]:
-    """Placeholder ZingHR data fetch.
-
-    Replace this function body once ZingHR API credentials are available.
-    config keys expected:
-      - base_url
-      - client_id
-      - client_secret  (from secrets)
-    """
+    """Placeholder ZingHR fetch — implement once API credentials are available."""
     raise NotImplementedError(
-        "ZingHR integration is not yet configured. "
+        "ZingHR integration is not yet implemented. "
         "Update fetch_zinghr() in data_sources.py once API details are available."
     )
 
@@ -59,8 +79,11 @@ def get_employees(cfg: dict, secrets: dict | None = None) -> list[dict[str, Any]
     if mode == "sample_json":
         url = cfg["data_source"].get("sample_url", "")
         if not url:
-            raise ValueError("sample_url is not configured in template_config.json.")
-        return fetch_sample_json(url)
+            raise ValueError("sample_url is not configured. Set it in the Data Source page.")
+        auth_header_name = cfg["data_source"].get("auth_header_name", "").strip()
+        auth_header_value = cfg["data_source"].get("auth_header_value", "").strip()
+        auth_header = {auth_header_name: auth_header_value} if auth_header_name else None
+        return fetch_sample_json(url, auth_header=auth_header)
 
     if mode == "zinghr":
         zinghr_cfg = dict(cfg["data_source"].get("zinghr", {}))
