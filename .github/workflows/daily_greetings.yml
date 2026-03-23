@@ -1,0 +1,61 @@
+name: Daily greetings
+
+on:
+  schedule:
+    # Runs at 08:00 IST (02:30 UTC) every weekday
+    - cron: "30 2 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Override date (YYYY-MM-DD) — leave blank for today"
+        required: false
+      dry_run:
+        description: "Dry run — generate posters but skip sending"
+        type: boolean
+        default: false
+
+jobs:
+  send-greetings:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Write secrets.toml
+        run: |
+          mkdir -p .streamlit
+          cat > .streamlit/secrets.toml << EOF
+          smtp_sender = "${{ secrets.SMTP_SENDER }}"
+          smtp_password = "${{ secrets.SMTP_PASSWORD }}"
+          withoutbg_api_key = "${{ secrets.WITHOUTBG_API_KEY }}"
+          EOF
+
+      - name: Run daily greeter
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.date }}" ]; then
+            ARGS="$ARGS --date ${{ github.event.inputs.date }}"
+          fi
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python daily_run.py $ARGS
+
+      - name: Upload generated posters as artefact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: posters-${{ github.run_id }}
+          path: storage/output/
+          retention-days: 7
