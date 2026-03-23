@@ -1,13 +1,14 @@
 """Email sending via SMTP (Office365)."""
 from __future__ import annotations
 
+import logging
 import smtplib
+from datetime import date
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from datetime import date
-from typing import Sequence
 
+logger = logging.getLogger(__name__)
 
 SMTP_HOST = "smtp.office365.com"
 SMTP_PORT = 587
@@ -47,12 +48,23 @@ def send_email(
     """Send an email with optional attachments via Office365 SMTP."""
     recipients = to + cc
     msg = _build_message(sender, to, cc, subject, body, attachments)
-
     with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
         server.ehlo()
         server.starttls()
         server.login(sender, password)
         server.sendmail(sender, recipients, msg.as_string())
+    logger.info("Email sent — subject: %r, recipients: %d", subject, len(recipients))
+
+
+def _names_summary(names: list[str]) -> str:
+    """'Alice', 'Alice & Bob', 'Alice, Bob & 3 others'."""
+    if not names:
+        return "team members"
+    if len(names) == 1:
+        return names[0]
+    if len(names) == 2:
+        return f"{names[0]} & {names[1]}"
+    return f"{names[0]}, {names[1]} & {len(names) - 2} others"
 
 
 def send_birthday_emails(
@@ -61,18 +73,32 @@ def send_birthday_emails(
     sender: str,
     password: str,
     today: date | None = None,
+    employee_names: list[str] | None = None,
 ) -> None:
-    """Send birthday poster email if there are any posters."""
+    """Send birthday poster email — personalised subject with employee names."""
     if not posters:
         return
     if today is None:
         today = date.today()
+
     to = recipients.get("to", [])
     cc = recipients.get("cc", [])
     if not to:
+        logger.warning("Birthday email skipped — no TO recipients configured.")
         return
-    subject = f"🎂 Birthday Greetings – {today.strftime('%d %B %Y')}"
-    body = "Please find attached the birthday greeting poster(s) for today."
+
+    names = employee_names or []
+    summary = _names_summary(names)
+    subject = f"🎂 Birthday greetings – {summary} | {today.strftime('%d %B %Y')}"
+    body = (
+        f"Hi,\n\n"
+        f"Please find attached the birthday greeting poster(s) for today "
+        f"({today.strftime('%d %B %Y')}).\n\n"
+    )
+    if names:
+        body += "Celebrating today:\n" + "\n".join(f"  • {n}" for n in names) + "\n\n"
+    body += "Warm regards,\nAutoGreet"
+
     send_email(sender, password, to, cc, subject, body, posters)
 
 
@@ -82,16 +108,30 @@ def send_anniversary_emails(
     sender: str,
     password: str,
     today: date | None = None,
+    employee_names: list[str] | None = None,
 ) -> None:
-    """Send anniversary poster email if there are any posters."""
+    """Send anniversary poster email — personalised subject with employee names."""
     if not posters:
         return
     if today is None:
         today = date.today()
+
     to = recipients.get("to", [])
     cc = recipients.get("cc", [])
     if not to:
+        logger.warning("Anniversary email skipped — no TO recipients configured.")
         return
-    subject = f"🎉 Work Anniversary Greetings – {today.strftime('%d %B %Y')}"
-    body = "Please find attached the work anniversary greeting poster(s) for today."
+
+    names = employee_names or []
+    summary = _names_summary(names)
+    subject = f"🎉 Work anniversary – {summary} | {today.strftime('%d %B %Y')}"
+    body = (
+        f"Hi,\n\n"
+        f"Please find attached the work anniversary greeting poster(s) for today "
+        f"({today.strftime('%d %B %Y')}).\n\n"
+    )
+    if names:
+        body += "Celebrating today:\n" + "\n".join(f"  • {n}" for n in names) + "\n\n"
+    body += "Warm regards,\nAutoGreet"
+
     send_email(sender, password, to, cc, subject, body, posters)
