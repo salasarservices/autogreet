@@ -153,12 +153,12 @@ html, body, [data-testid="stAppViewContainer"] {
 [data-testid="stSidebar"] label,
 [data-testid="stSidebar"] div { color: #cbd5e1 !important; }
 
-/* Nav buttons — solid background, bold white text, clear contrast */
+/* Nav buttons — cyan (#00BCD4) background, dark text */
 [data-testid="stSidebar"] .stButton > button {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(255,255,255,0.10) !important;
+    background: rgba(0, 188, 212, 1) !important;
+    border: 1px solid rgba(0, 160, 180, 1) !important;
     border-radius: 8px !important;
-    color: #f1f5f9 !important;
+    color: rgba(15, 23, 42, 1) !important;
     font-size: 0.875rem !important;
     font-weight: 700 !important;
     text-align: left !important;
@@ -168,16 +168,38 @@ html, body, [data-testid="stAppViewContainer"] {
     letter-spacing: 0.01em;
 }
 [data-testid="stSidebar"] .stButton > button:hover {
-    background: rgba(99,102,241,0.22) !important;
-    border-color: rgba(99,102,241,0.55) !important;
-    color: #ffffff !important;
+    background: rgba(0, 210, 235, 1) !important;
+    border-color: rgba(0, 188, 212, 1) !important;
+    color: rgba(15, 23, 42, 1) !important;
+    box-shadow: 0 3px 10px rgba(0, 188, 212, 0.40) !important;
 }
 [data-testid="stSidebar"] .stButton > button:active,
 [data-testid="stSidebar"] .stButton > button:focus {
-    background: rgba(99,102,241,0.35) !important;
-    border-color: #6366f1 !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 0 2px rgba(99,102,241,0.4) !important;
+    background: rgba(0, 172, 193, 1) !important;
+    border-color: rgba(0, 188, 212, 1) !important;
+    color: rgba(15, 23, 42, 1) !important;
+    box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.35) !important;
+}
+
+/* Send Today's Greetings — green (#8BC34A) */
+[data-testid="stSidebar"] [data-testid="baseButton-primary"],
+[data-testid="stSidebar"] button[kind="primary"] {
+    background: rgba(139, 195, 74, 1) !important;
+    border: 1px solid rgba(115, 163, 61, 1) !important;
+    border-radius: 10px !important;
+    color: rgba(15, 23, 42, 1) !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    padding: 11px 26px !important;
+    box-shadow: 0 4px 14px rgba(139, 195, 74, 0.35) !important;
+    transition: all 0.2s ease !important;
+}
+[data-testid="stSidebar"] [data-testid="baseButton-primary"]:hover,
+[data-testid="stSidebar"] button[kind="primary"]:hover {
+    background: rgba(164, 214, 94, 1) !important;
+    box-shadow: 0 6px 20px rgba(139, 195, 74, 0.50) !important;
+    transform: translateY(-1px) !important;
+    color: rgba(15, 23, 42, 1) !important;
 }
 
 /* ── Page header ── */
@@ -288,20 +310,21 @@ html, body, [data-testid="stAppViewContainer"] {
 .ag-empty-icon { font-size: 2.2rem; margin-bottom: 10px; }
 .ag-empty-text { font-size: 0.88rem; line-height: 1.6; }
 
-/* ── Gradient send CTA button ── */
+/* ── Send CTA button (fallback) ── */
 .ag-send-cta .stButton > button {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-    color: white !important;
-    border: none !important;
+    background: rgba(139, 195, 74, 1) !important;
+    color: rgba(15, 23, 42, 1) !important;
+    border: 1px solid rgba(115, 163, 61, 1) !important;
     border-radius: 10px !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     font-size: 0.95rem !important;
     padding: 11px 26px !important;
-    box-shadow: 0 4px 14px rgba(99,102,241,0.35) !important;
+    box-shadow: 0 4px 14px rgba(139, 195, 74, 0.35) !important;
     transition: all 0.2s ease !important;
 }
 .ag-send-cta .stButton > button:hover {
-    box-shadow: 0 6px 20px rgba(99,102,241,0.5) !important;
+    background: rgba(164, 214, 94, 1) !important;
+    box-shadow: 0 6px 20px rgba(139, 195, 74, 0.50) !important;
     transform: translateY(-1px) !important;
 }
 </style>
@@ -348,9 +371,15 @@ def render_sidebar() -> str:
             <div style="padding:20px 8px 6px 8px;">
               <img src="https://ik.imagekit.io/salasarservices/Salasar-Logo-white.png?updatedAt=1773827925808"
                    style="max-width:160px;width:100%;height:auto;display:block;" alt="Salasar Logo" />
-              <div style="font-size:0.73rem;color:#475569;margin-top:8px;">Employee Celebration Hub</div>
+              <div style="font-size:1.35rem;font-weight:800;color:#f1f5f9;letter-spacing:-0.01em;margin-top:14px;line-height:1.2;">AutoGreet</div>
+              <div style="font-size:0.72rem;color:#64748b;margin-top:8px;line-height:1.6;">
+                AutoGreet automates employee birthday and work anniversary celebrations.
+                It generates personalised greeting posters and dispatches them via your
+                Office365 account every day — completely hands-free.
+                Set it up once and never miss a milestone again.
+              </div>
             </div>
-            <hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:12px 0 16px 0;">
+            <hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:14px 0 16px 0;">
             """,
             unsafe_allow_html=True,
         )
