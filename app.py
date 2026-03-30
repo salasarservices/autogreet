@@ -183,11 +183,14 @@ html, body, [data-testid="stAppViewContainer"] {
 
 /* Send Today's Greetings — green (#8BC34A) */
 [data-testid="stSidebar"] [data-testid="baseButton-primary"],
-[data-testid="stSidebar"] button[kind="primary"] {
-    background: rgba(139, 195, 74, 1) !important;
+[data-testid="stSidebar"] [data-testid="baseButton-primary"] p,
+[data-testid="stSidebar"] button[kind="primary"],
+[data-testid="stSidebar"] .stButton > button[data-testid="baseButton-primary"] {
+    background: #8bc34a !important;
+    background-color: #8bc34a !important;
     border: 1px solid rgba(115, 163, 61, 1) !important;
     border-radius: 10px !important;
-    color: rgba(15, 23, 42, 1) !important;
+    color: #0f172a !important;
     font-weight: 700 !important;
     font-size: 0.95rem !important;
     padding: 11px 26px !important;
@@ -195,11 +198,13 @@ html, body, [data-testid="stAppViewContainer"] {
     transition: all 0.2s ease !important;
 }
 [data-testid="stSidebar"] [data-testid="baseButton-primary"]:hover,
-[data-testid="stSidebar"] button[kind="primary"]:hover {
-    background: rgba(164, 214, 94, 1) !important;
+[data-testid="stSidebar"] button[kind="primary"]:hover,
+[data-testid="stSidebar"] .stButton > button[data-testid="baseButton-primary"]:hover {
+    background: #a5d664 !important;
+    background-color: #a5d664 !important;
     box-shadow: 0 6px 20px rgba(139, 195, 74, 0.50) !important;
     transform: translateY(-1px) !important;
-    color: rgba(15, 23, 42, 1) !important;
+    color: #0f172a !important;
 }
 
 /* ── Page header ── */
@@ -310,10 +315,12 @@ html, body, [data-testid="stAppViewContainer"] {
 .ag-empty-icon { font-size: 2.2rem; margin-bottom: 10px; }
 .ag-empty-text { font-size: 0.88rem; line-height: 1.6; }
 
-/* ── Send CTA button (fallback) ── */
-.ag-send-cta .stButton > button {
-    background: rgba(139, 195, 74, 1) !important;
-    color: rgba(15, 23, 42, 1) !important;
+/* ── Send CTA button ── */
+.ag-send-cta .stButton > button,
+.ag-send-cta .stButton > button[data-testid="baseButton-primary"] {
+    background: #8bc34a !important;
+    background-color: #8bc34a !important;
+    color: #0f172a !important;
     border: 1px solid rgba(115, 163, 61, 1) !important;
     border-radius: 10px !important;
     font-weight: 700 !important;
@@ -323,7 +330,9 @@ html, body, [data-testid="stAppViewContainer"] {
     transition: all 0.2s ease !important;
 }
 .ag-send-cta .stButton > button:hover {
-    background: rgba(164, 214, 94, 1) !important;
+    background: #a5d664 !important;
+    background-color: #a5d664 !important;
+    color: #0f172a !important;
     box-shadow: 0 6px 20px rgba(139, 195, 74, 0.50) !important;
     transform: translateY(-1px) !important;
 }
@@ -374,9 +383,6 @@ def render_sidebar() -> str:
               <div style="font-size:1.35rem;font-weight:800;color:#f1f5f9;letter-spacing:-0.01em;margin-top:14px;line-height:1.2;">AutoGreet</div>
               <div style="font-size:0.72rem;color:#64748b;margin-top:8px;line-height:1.6;">
                 AutoGreet automates employee birthday and work anniversary celebrations.
-                It generates personalised greeting posters and dispatches them via your
-                Office365 account every day — completely hands-free.
-                Set it up once and never miss a milestone again.
               </div>
             </div>
             <hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:14px 0 16px 0;">
