@@ -151,22 +151,33 @@ html, body, [data-testid="stAppViewContainer"] {
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
 [data-testid="stSidebar"] label,
-[data-testid="stSidebar"] div { color: #94a3b8 !important; }
+[data-testid="stSidebar"] div { color: #cbd5e1 !important; }
 
+/* Nav buttons — solid background, bold white text, clear contrast */
 [data-testid="stSidebar"] .stButton > button {
-    background: transparent !important;
-    border: none !important;
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
     border-radius: 8px !important;
-    color: #94a3b8 !important;
+    color: #f1f5f9 !important;
     font-size: 0.875rem !important;
+    font-weight: 700 !important;
     text-align: left !important;
-    padding: 8px 14px !important;
+    padding: 9px 14px !important;
     width: 100% !important;
     transition: all 0.15s ease;
+    letter-spacing: 0.01em;
 }
 [data-testid="stSidebar"] .stButton > button:hover {
-    background: rgba(255,255,255,0.07) !important;
-    color: #e2e8f0 !important;
+    background: rgba(99,102,241,0.22) !important;
+    border-color: rgba(99,102,241,0.55) !important;
+    color: #ffffff !important;
+}
+[data-testid="stSidebar"] .stButton > button:active,
+[data-testid="stSidebar"] .stButton > button:focus {
+    background: rgba(99,102,241,0.35) !important;
+    border-color: #6366f1 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.4) !important;
 }
 
 /* ── Page header ── */
@@ -252,11 +263,11 @@ html, body, [data-testid="stAppViewContainer"] {
 
 /* ── Sidebar section label ── */
 .ag-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #475569;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    color: #94a3b8 !important;
     padding: 0 4px;
     margin-bottom: 6px;
     display: block;
@@ -335,15 +346,16 @@ def render_sidebar() -> str:
         st.markdown(
             """
             <div style="padding:20px 8px 6px 8px;">
-              <div style="font-size:1.2rem;font-weight:700;color:#e2e8f0;letter-spacing:-0.01em;">AutoGreet</div>
-              <div style="font-size:0.73rem;color:#475569;margin-top:2px;">Employee celebration hub</div>
+              <img src="https://ik.imagekit.io/salasarservices/Salasar-Logo-white.png?updatedAt=1773827925808"
+                   style="max-width:160px;width:100%;height:auto;display:block;" alt="Salasar Logo" />
+              <div style="font-size:0.73rem;color:#475569;margin-top:8px;">Employee Celebration Hub</div>
             </div>
             <hr style="border:none;border-top:1px solid rgba(255,255,255,0.07);margin:12px 0 16px 0;">
             """,
             unsafe_allow_html=True,
         )
 
-        st.markdown('<span class="ag-label">DAILY OPS</span>', unsafe_allow_html=True)
+        st.markdown('<span class="ag-label">Daily Ops</span>', unsafe_allow_html=True)
         for p in ACTION_PAGES:
             if st.button(p, key=f"nav_{p}", use_container_width=True):
                 _nav(p)
@@ -353,10 +365,10 @@ def render_sidebar() -> str:
             unsafe_allow_html=True,
         )
 
-        st.markdown('<span class="ag-label">SETUP</span>', unsafe_allow_html=True)
+        st.markdown('<span class="ag-label">Setup</span>', unsafe_allow_html=True)
         for p in SETUP_PAGES:
             done  = st.session_state.get(SETUP_DONE_KEYS.get(p, ""), False)
-            label = ("[done] " if done else "") + p
+            label = ("✓ " if done else "") + p
             if st.button(label, key=f"nav_{p}", use_container_width=True):
                 _nav(p)
 
@@ -374,7 +386,7 @@ def render_sidebar() -> str:
         st.markdown(
             f"""
             <div style="padding:14px 8px 6px 8px;">
-              <div style="font-size:0.7rem;color:#475569;margin-bottom:5px;">SETUP PROGRESS</div>
+              <div style="font-size:0.7rem;font-weight:700;color:#94a3b8;margin-bottom:5px;">Setup Progress</div>
               <div style="background:rgba(255,255,255,0.06);border-radius:999px;height:4px;overflow:hidden;">
                 <div style="background:#6366f1;width:{done_count * 25}%;height:100%;border-radius:999px;"></div>
               </div>
