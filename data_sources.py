@@ -81,7 +81,19 @@ def get_employees(cfg: dict, secrets: dict | None = None) -> list[dict[str, Any]
         if not url:
             raise ValueError("sample_url is not configured. Set it in the Data Source page.")
         auth_header_name = cfg["data_source"].get("auth_header_name", "").strip()
-        auth_header_value = cfg["data_source"].get("auth_header_value", "").strip()
+
+        # Prefer secrets for the header value (secure); fall back to config for
+        # backward compatibility only. The config value is deprecated.
+        if secrets and secrets.get("api_auth_header_value"):
+            auth_header_value = secrets["api_auth_header_value"].strip()
+        else:
+            auth_header_value = cfg["data_source"].get("auth_header_value", "").strip()
+            if auth_header_value:
+                logger.warning(
+                    "auth_header_value in template_config.json is deprecated and insecure. "
+                    "Move it to secrets.toml as 'api_auth_header_value'.",
+                )
+
         auth_header = {auth_header_name: auth_header_value} if auth_header_name else None
         return fetch_sample_json(url, auth_header=auth_header)
 

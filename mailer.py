@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import smtplib
+import time
 from datetime import date
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
@@ -12,6 +13,10 @@ logger = logging.getLogger(__name__)
 
 SMTP_HOST = "smtp.office365.com"
 SMTP_PORT = 587
+
+# Retry settings for transient SMTP failures
+_MAX_RETRIES = 3
+_RETRY_BASE_DELAY = 2  # seconds; doubles on each attempt
 
 
 def _build_message(
@@ -45,15 +50,37 @@ def send_email(
     body: str,
     attachments: list[tuple[str, bytes]],
 ) -> None:
-    """Send an email with optional attachments via Office365 SMTP."""
+    """Send an email with optional attachments via Office365 SMTP.
+
+    Retries up to _MAX_RETRIES times with exponential backoff on transient
+    SMTP errors. Raises the last exception if all attempts fail.
+    """
     recipients = to + cc
     msg = _build_message(sender, to, cc, subject, body, attachments)
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.ehlo()
-        server.starttls()
-        server.login(sender, password)
-        server.sendmail(sender, recipients, msg.as_string())
-    logger.info("Email sent — subject: %r, recipients: %d", subject, len(recipients))
+    last_exc: Exception | None = None
+
+    for attempt in range(1, _MAX_RETRIES + 1):
+        try:
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+                server.ehlo()
+                server.starttls()
+                server.login(sender, password)
+                server.sendmail(sender, recipients, msg.as_string())
+            logger.info("Email sent — subject: %r, recipients: %d", subject, len(recipients))
+            return
+        except smtplib.SMTPException as exc:
+            last_exc = exc
+            if attempt < _MAX_RETRIES:
+                delay = _RETRY_BASE_DELAY * (2 ** (attempt - 1))
+                logger.warning(
+                    "SMTP attempt %d/%d failed (%s) — retrying in %ds",
+                    attempt, _MAX_RETRIES, exc, delay,
+                )
+                time.sleep(delay)
+            else:
+                logger.error("SMTP failed after %d attempts: %s", _MAX_RETRIES, exc)
+
+    raise last_exc  # type: ignore[misc]
 
 
 def _names_summary(names: list[str]) -> str:
@@ -89,7 +116,7 @@ def send_birthday_emails(
 
     names = employee_names or []
     summary = _names_summary(names)
-    subject = f"🎂 Birthday greetings – {summary} | {today.strftime('%d %B %Y')}"
+    subject = f"Happy Birthday – {summary} | {today.strftime('%d %B %Y')}"
     body = (
         f"Hi,\n\n"
         f"Please find attached the birthday greeting poster(s) for today "
@@ -124,7 +151,7 @@ def send_anniversary_emails(
 
     names = employee_names or []
     summary = _names_summary(names)
-    subject = f"🎉 Work anniversary – {summary} | {today.strftime('%d %B %Y')}"
+    subject = f"Work Anniversary – {summary} | {today.strftime('%d %B %Y')}"
     body = (
         f"Hi,\n\n"
         f"Please find attached the work anniversary greeting poster(s) for today "

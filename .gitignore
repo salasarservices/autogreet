@@ -1,5 +1,6 @@
 .streamlit/secrets.toml
-storage/
+storage/output/
+# sent_log.jsonl is intentionally tracked for cross-run idempotency
 __pycache__/
 *.pyc
 *.pyo

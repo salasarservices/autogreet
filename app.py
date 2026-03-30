@@ -189,6 +189,9 @@ def page_data_source() -> None:
         format_func=lambda x: {"sample_json": "JSON endpoint", "zinghr": "ZingHR (coming soon)"}[x],
         horizontal=True,
     )
+    # Do not persist ZingHR as the active mode until it is implemented.
+    if mode == "zinghr":
+        mode = "sample_json"
     cfg["data_source"]["mode"] = mode
 
     if mode == "sample_json":
@@ -200,20 +203,22 @@ def page_data_source() -> None:
         cfg["data_source"]["sample_url"] = url
 
         with st.expander("Authentication (optional)"):
-            c1, c2 = st.columns(2)
-            h_name = c1.text_input(
+            h_name = st.text_input(
                 "Header name",
                 value=cfg["data_source"].get("auth_header_name", ""),
                 placeholder="Authorization",
             )
-            h_val = c2.text_input(
-                "Header value",
-                value=cfg["data_source"].get("auth_header_value", ""),
-                placeholder="Bearer …",
-                type="password",
-            )
             cfg["data_source"]["auth_header_name"] = h_name
-            cfg["data_source"]["auth_header_value"] = h_val
+            st.info(
+                "Store the header **value** (e.g. your Bearer token) in "
+                "`.streamlit/secrets.toml` as `api_auth_header_value`. "
+                "This keeps credentials out of the committed config file."
+            )
+            if cfg["data_source"].get("auth_header_value"):
+                st.warning(
+                    "A header value is saved in `template_config.json`. "
+                    "Move it to secrets.toml and remove it from config for security."
+                )
     else:
         st.info("ZingHR integration is coming soon. Configure the JSON endpoint for now.")
         zc = cfg["data_source"]["zinghr"]
